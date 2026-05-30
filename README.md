@@ -25,3 +25,52 @@ Systemd allows us to execute scripts during power state changes. Create a new sc
 
 ```bash
 sudo nano /lib/systemd/system-sleep/openrgb-toggle
+```
+
+### 2. Add the script content
+Paste the following script into the file. Make sure to replace `yourusername` with your actual Ubuntu username (run whoami if you are unsure).
+```bash
+#!/bin/sh
+
+# Replace 'yourusername' with your actual Ubuntu username
+USER_NAME="yourusername"
+USER_HOME="/home/$USER_NAME"
+
+case "$1" in
+    pre)
+        # Actions to run BEFORE the PC suspends
+        sudo -u "$USER_NAME" DISPLAY=:0 XAUTHORITY="$USER_HOME/.Xauthority" openrgb --profile off
+        ;;
+    post)
+        # Actions to run AFTER the PC wakes up
+        sleep 2 # Brief pause to let USB controllers initialize
+        sudo -u "$USER_NAME" DISPLAY=:0 XAUTHORITY="$USER_HOME/.Xauthority" openrgb --profile default
+        ;;
+esac
+```
+
+### 3. Make The Script Executable
+Give the system permission to execute the script:
+```bash
+sudo chmod +x /lib/systemd/system-sleep/openrgb-toggle
+```
+<img width="1440" height="508" alt="image" src="https://github.com/user-attachments/assets/1514e6d0-d4d3-42af-80e8-7012fa591a33" />
+
+## Optional: Load Profile on Cold Boot
+The script above handles suspend/resume cycles. To ensure your profile also loads when you completely turn on or restart your PC:
+
+    1. Open the Startup Applications utility from your Ubuntu Dash.
+
+    2. Click Add.
+
+    3. Enter the following details:
+
+        Name: OpenRGB Default Profile
+
+        Command: openrgb --profile default
+
+        Comment: Loads RGB profile on system boot.
+
+    4. Click Save.
+
+<img width="1522" height="1160" alt="image" src="https://github.com/user-attachments/assets/1751c222-cb45-4323-9788-6cf046dabb77" />
